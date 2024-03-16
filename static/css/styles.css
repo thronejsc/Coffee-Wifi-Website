@@ -2,7 +2,7 @@
 your web pages for the styles to be rendered. */
 
 body {
-background-color: #333;
+background-color: #E6E6E6;
 color: white;
 }
 
@@ -10,16 +10,51 @@ a {
     color: #ffc107;
 }
 
+.header-background {
+    background-color: #E6E6E6;
+}
+
+.footer-background {
+    background-color: #E6E6E6;
+}
+
+
+.nav-pills .nav-item .nav-link.active {
+    background-color: #C5A880;
+    color: #532E1C;
+}
+
+.nav-pills .nav-item .nav-link {
+    color: #532E1C;
+}
+
+.fs-4 {
+    color: #532E1C;
+}
+
 .jumbotron {
   display: flex;
   align-items: center;
   margin: 0;
   height: 100vh;
-  color: white;
-  background-color: #333;
+  color: #532E1C;
+  background-color: #E6E6E6;
 }
 
 .space-above {
     margin-top: 20px;
     padding-top: 20px;
+}
+
+.btn-custom {
+    background-color: #C5A880;
+    border-color: #E6E6E6;
+    color: #532E1C;
+
+}
+
+.btn-custom:hover {
+    background-color: #0F0F0F;
+    border-color: #E6E6E6;
+    color: #E6E6E6;
 }
