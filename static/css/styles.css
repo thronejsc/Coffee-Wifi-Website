@@ -32,6 +32,10 @@ a {
     color: #532E1C;
 }
 
+h1 {
+    color: #532E1C;
+}
+
 .jumbotron {
   display: flex;
   align-items: center;

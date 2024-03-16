@@ -70,6 +70,49 @@ def home():
     return render_template("index.html")
 
 
+@app.route('/all-cafes-json')
+def all_cafe_json():
+    cafes = []
+    all_cafes = db.session.execute(db.select(Cafe)).scalars().all()
+
+    if all_cafes:
+        for cafe in all_cafes:
+            cafe_json = {
+                "id": cafe.id,
+                "name": cafe.name,
+                "map_url": cafe.map_url,
+                "location": cafe.location,
+                "seats": cafe.seats,
+                "has_toilet": cafe.has_toilet,
+                "has_wifi": cafe.has_wifi,
+                "has_sockets": cafe.has_sockets,
+                "can_take_calls": cafe.can_take_calls,
+                "coffee_price": cafe.coffee_price
+            }
+            cafes.append(cafe_json)
+
+        return jsonify(cafes)
+    else:
+        not_found = {
+            "error": {
+                "Not Found": "There are no cafes in the database"
+            }
+        }
+        return not_found
+
+
+@app.route('/all')
+def all_cafe():
+    # column_names = Cafe.__table__.columns.keys()
+    column_names = ['Name', 'Location', 'Map URL', 'Seats', 'WiFi Connection', 'Toilet', 'Sockets', 'Can take calls', 'Coffee Price']
+    all_cafes = db.session.execute(db.select(Cafe)).scalars().all()
+    return render_template("all_cafes.html", column_names=column_names, cafes=all_cafes)
+
+
+
+
+
+
 # When user wants to see a specific cafe
 # @app.route("/cafe/<int:cafe_id>", methods=["GET"])
 # def show_post(cafe_id):
