@@ -7,11 +7,19 @@ color: white;
 }
 
 a {
-    color: #ffc107;
+    color: #0F0F0F;
 }
 
 .header-background {
     background-color: #E6E6E6;
+}
+
+.header-image {
+    width: 100%; /* Make the image fill the container width */
+    max-height: 50vh; /* Limit the height to the viewport height */
+    object-fit: cover; /* Ensure the image covers the entire container */
+    object-position: center; /* Center the image within the container */
+    display: block; /* Ensure proper display behavior */
 }
 
 .footer-background {
@@ -60,5 +68,13 @@ h1 {
 .btn-custom:hover {
     background-color: #0F0F0F;
     border-color: #E6E6E6;
+    color: #E6E6E6;
+}
+
+#details {
+    color: #532E1C;
+}
+
+.cafe-name {
     color: #E6E6E6;
 }

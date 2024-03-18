@@ -70,6 +70,11 @@ def home():
     return render_template("index.html")
 
 
+@app.route("/test")
+def test():
+    return render_template("cafe.html")
+
+
 @app.route('/all-cafes-json')
 def all_cafe_json():
     cafes = []
@@ -106,7 +111,24 @@ def all_cafe():
     # column_names = Cafe.__table__.columns.keys()
     column_names = ['Name', 'Location', 'Map URL', 'Seats', 'WiFi Connection', 'Toilet', 'Sockets', 'Can take calls', 'Coffee Price']
     all_cafes = db.session.execute(db.select(Cafe)).scalars().all()
-    return render_template("all_cafes.html", column_names=column_names, cafes=all_cafes)
+    modified_cafes = []
+    for cafe in all_cafes:
+        modified_cafe = {
+            "id": cafe.id,
+            "name": cafe.name,
+            "map_url": cafe.map_url,
+            "img_url": cafe.img_url,
+            "location": cafe.location,
+            "seats": cafe.seats,
+            "has_toilet": "Yes" if cafe.has_toilet else "No",
+            "has_wifi": "Yes" if cafe.has_wifi else "No",
+            "has_sockets": "Yes" if cafe.has_sockets else "No",
+            "can_take_calls": "Yes" if cafe.can_take_calls else "No",
+            "coffee_price": cafe.coffee_price
+        }
+        modified_cafes.append(modified_cafe)
+
+    return render_template("all_cafes.html", column_names=column_names, cafes=modified_cafes)
 
 
 
