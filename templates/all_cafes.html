@@ -19,7 +19,7 @@
 
           {% for cafe in cafes %}
           <tr>
-              <td>{{ cafe.name }}</td>
+              <td><a href="{{ url_for('cafe', cafe_name=cafe.name.replace(' ', '-')) }}">{{ cafe.name }}</a></td>
               <td>{{ cafe.location }}</td>
               <td><a href="{{ cafe.map_url }}">Map Link </a></td>
               <td>{{ cafe.seats }}</td>

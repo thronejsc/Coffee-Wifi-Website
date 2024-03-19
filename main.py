@@ -36,7 +36,7 @@ class Cafe(db.Model):
     has_sockets: Mapped[bool] = mapped_column(Boolean, nullable=False)
     can_take_calls: Mapped[bool] = mapped_column(Boolean, nullable=False)
     coffee_price: Mapped[str] = mapped_column(String(250), nullable=True)
-# TODO: Add reviews and cafe desc
+# TODO: Add reviews, opening_time, closing time, and cafe desc
 
 
 with app.app_context():
@@ -62,6 +62,8 @@ class CafeForm(FlaskForm):
                                 validators=[DataRequired()])
     submit = SubmitField('Submit')
 
+    # TODO: Add 'has_toilet', 'can_take_calls', 'seats', 'map_url', 'img_url'
+
 # TODO: Make a form for reviews for a cafe
 
 
@@ -70,9 +72,11 @@ def home():
     return render_template("index.html")
 
 
-@app.route("/test")
-def test():
-    return render_template("cafe.html")
+@app.route("/cafe/<cafe_name>")
+def cafe(cafe_name):
+    cafe_name = cafe_name.replace('-', ' ')
+    requested_cafe = db.session.execute(db.select(Cafe).where(Cafe.name == cafe_name)).scalar()
+    return render_template("cafe.html", cafe_name=cafe_name, cafe=requested_cafe)
 
 
 @app.route('/all-cafes-json')
@@ -131,6 +135,23 @@ def all_cafe():
     return render_template("all_cafes.html", column_names=column_names, cafes=modified_cafes)
 
 
+@app.route('/add', methods=['GET', 'POST'])
+def add_cafe():
+    form = CafeForm()
+    # if form.validate_on_submit():
+    #     data = form.data
+    #     cafe_data = [data[i] for i in data]
+    #     with open('cafe-data.csv', 'a', encoding='utf-8') as csv_file:
+    #         for index in range(len(cafe_data[:-2])):
+    #             row = cafe_data[index]
+    #             if index == 0:
+    #                 csv_file.write(f"\n{row},")
+    #             elif index == len(cafe_data[:-2]) - 1:
+    #                 csv_file.write(f"{row}")
+    #             else:
+    #                 csv_file.write(f"{row},")
+    #     return redirect(url_for('cafes'))
+    return render_template('add.html', form=form)
 
 
 
