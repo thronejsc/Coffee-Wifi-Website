@@ -7,7 +7,7 @@
 
       <h1>All Cafes</h1>
 
-	  <table class="table table-dark table-striped table-hover">
+	  <table class="table table-striped table-hover custom-table">
 
           <tr>
               {% for column_name in column_names %}
@@ -23,11 +23,53 @@
               <td>{{ cafe.location }}</td>
               <td><a href="{{ cafe.map_url }}">Map Link </a></td>
               <td>{{ cafe.seats }}</td>
+              <td>
+                  {% if cafe.wifi_rating == '1' %}
+                        💪
+                  {% elif cafe.wifi_rating == '2' %}
+                        💪💪
+                  {% elif cafe.wifi_rating == '3' %}
+                        💪💪💪
+                  {% elif cafe.wifi_rating == '4' %}
+                        💪💪💪💪
+                  {% elif cafe.wifi_rating == '5' %}
+                        💪💪💪💪💪
+                  {% elif cafe.wifi_rating == '0' %}
+                        ✘
+                  {% endif %}
+              </td>
               <td>{{ cafe.has_toilet }}</td>
-              <td>{{ cafe.has_wifi }}</td>
-              <td>{{ cafe.has_sockets }}</td>
+              <td>
+                  {% if cafe.outlet_rating == '1' %}
+                        🔌
+                  {% elif cafe.outlet_rating == '2' %}
+                        🔌🔌
+                  {% elif cafe.outlet_rating == '3' %}
+                        🔌🔌🔌
+                  {% elif cafe.outlet_rating == '4' %}
+                        🔌🔌🔌🔌
+                  {% elif cafe.outlet_rating == '5' %}
+                        🔌🔌🔌🔌🔌
+                  {% elif cafe.outlet_rating == '0' %}
+                        ✘
+                  {% endif %}
+              </td>
               <td>{{ cafe.can_take_calls }}</td>
-              <td>{{ cafe.coffee_price }}</td>
+              <td>
+                  {% if cafe.coffee_rating == '1' %}
+                        ☕️
+                  {% elif cafe.coffee_rating == '2' %}
+                        ☕️☕️
+                  {% elif cafe.coffee_rating == '3' %}
+                        ☕️☕️☕️
+                  {% elif cafe.coffee_rating == '4' %}
+                        ☕️☕️☕️☕️
+                  {% elif cafe.coffee_rating == '5' %}
+                        ☕️☕️☕️☕️☕️
+                  {% elif cafe.coffee_rating == '0' %}
+                        ✘
+                  {% endif %}
+              </td>
 
           </tr>
           {% endfor %}

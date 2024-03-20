@@ -4,7 +4,7 @@ from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 from sqlalchemy import Integer, String, Boolean
 from flask_bootstrap import Bootstrap5
 from flask_wtf import FlaskForm
-from wtforms import StringField, SubmitField, SelectField
+from wtforms import StringField, SubmitField, SelectField, TextAreaField, BooleanField
 from wtforms.validators import DataRequired, URL
 import random
 
@@ -27,16 +27,19 @@ db.init_app(app)
 class Cafe(db.Model):
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     name: Mapped[str] = mapped_column(String(250), unique=True, nullable=False)
-    map_url: Mapped[str] = mapped_column(String(500), nullable=False)
-    img_url: Mapped[str] = mapped_column(String(500), nullable=False)
+    map_url: Mapped[str] = mapped_column(String(500), nullable=True)
+    img_url: Mapped[str] = mapped_column(String(500), nullable=True)
     location: Mapped[str] = mapped_column(String(250), nullable=False)
+    open_time: Mapped[str] = mapped_column(String(10), nullable=True)
+    closing_time: Mapped[str] = mapped_column(String(10), nullable=True)
     seats: Mapped[str] = mapped_column(String(250), nullable=False)
     has_toilet: Mapped[bool] = mapped_column(Boolean, nullable=False)
-    has_wifi: Mapped[bool] = mapped_column(Boolean, nullable=False)
-    has_sockets: Mapped[bool] = mapped_column(Boolean, nullable=False)
+    wifi_rating: Mapped[str] = mapped_column(String(1), nullable=False)
+    outlet_rating: Mapped[str] = mapped_column(String(1), nullable=False)
     can_take_calls: Mapped[bool] = mapped_column(Boolean, nullable=False)
-    coffee_price: Mapped[str] = mapped_column(String(250), nullable=True)
-# TODO: Add reviews, opening_time, closing time, and cafe desc
+    coffee_price: Mapped[str] = mapped_column(String(10), nullable=True)
+    coffee_rating: Mapped[str] = mapped_column(String(10), nullable=True)
+    cafe_desc: Mapped[str] = mapped_column(String(1000), nullable=True)
 
 
 with app.app_context():
@@ -44,10 +47,16 @@ with app.app_context():
 
 
 class CafeForm(FlaskForm):
-    cafe = StringField('Cafe name', validators=[DataRequired()])
-    location = StringField('Cafe location', validators=[URL()])
+    name = StringField('Cafe name', validators=[DataRequired()])
+    map_url = StringField('Map URL', validators=[URL()])
+    img_url = StringField('Image URL')
+    location = StringField('Cafe location', description='ex. City or Country', validators=[DataRequired()])
+    seats = StringField('Number of seats', description='ex. (10, 10-15, 20+ )', validators=[DataRequired()])
     open_time = StringField('Open time', description="ex. 11AM/1:30PM", validators=[DataRequired()])
     closing_time = StringField('Closing time', description="ex. 11AM/1:30PM", validators=[DataRequired()])
+    can_take_calls = BooleanField('Can Take Calls')
+    has_toilet = BooleanField('Has Toilet/Restroom')
+    coffee_price = StringField('Coffee price', description='Estimate or minimum price', validators=[DataRequired()])
     coffee_rating = SelectField(label="Coffee Rating",
                                 choices=[('1', '☕️'), ('2', '☕️☕️'), ('3', '☕️☕️☕️'), ('4', '☕️☕️☕️☕️'),
                                          ('5', '☕️☕️☕️☕️☕️')],
@@ -60,9 +69,9 @@ class CafeForm(FlaskForm):
                                 choices=[('1', '🔌'), ('2', '🔌🔌'), ('3', '🔌🔌🔌'), ('4', '🔌🔌🔌🔌'), ('5', '🔌🔌🔌🔌🔌'),
                                          ('0', '✘')],
                                 validators=[DataRequired()])
+    cafe_desc = TextAreaField(label='Cafe Description', validators=[DataRequired()])
     submit = SubmitField('Submit')
 
-    # TODO: Add 'has_toilet', 'can_take_calls', 'seats', 'map_url', 'img_url'
 
 # TODO: Make a form for reviews for a cafe
 
@@ -111,24 +120,22 @@ def all_cafe_json():
 
 
 @app.route('/all')
-def all_cafe():
+def all_cafes():
     # column_names = Cafe.__table__.columns.keys()
-    column_names = ['Name', 'Location', 'Map URL', 'Seats', 'WiFi Connection', 'Toilet', 'Sockets', 'Can take calls', 'Coffee Price']
+    column_names = ['Name', 'Location', 'Map URL', 'Seats', 'WiFi Connection', 'Toilet', 'Sockets Availability', 'Can take calls', 'Coffee Rating']
     all_cafes = db.session.execute(db.select(Cafe)).scalars().all()
     modified_cafes = []
     for cafe in all_cafes:
         modified_cafe = {
-            "id": cafe.id,
             "name": cafe.name,
             "map_url": cafe.map_url,
-            "img_url": cafe.img_url,
             "location": cafe.location,
             "seats": cafe.seats,
             "has_toilet": "Yes" if cafe.has_toilet else "No",
-            "has_wifi": "Yes" if cafe.has_wifi else "No",
-            "has_sockets": "Yes" if cafe.has_sockets else "No",
+            "wifi_rating": cafe.wifi_rating,
+            "outlet_rating": cafe.outlet_rating,
             "can_take_calls": "Yes" if cafe.can_take_calls else "No",
-            "coffee_price": cafe.coffee_price
+            "coffee_rating": cafe.coffee_rating
         }
         modified_cafes.append(modified_cafe)
 
@@ -138,30 +145,31 @@ def all_cafe():
 @app.route('/add', methods=['GET', 'POST'])
 def add_cafe():
     form = CafeForm()
-    # if form.validate_on_submit():
-    #     data = form.data
-    #     cafe_data = [data[i] for i in data]
-    #     with open('cafe-data.csv', 'a', encoding='utf-8') as csv_file:
-    #         for index in range(len(cafe_data[:-2])):
-    #             row = cafe_data[index]
-    #             if index == 0:
-    #                 csv_file.write(f"\n{row},")
-    #             elif index == len(cafe_data[:-2]) - 1:
-    #                 csv_file.write(f"{row}")
-    #             else:
-    #                 csv_file.write(f"{row},")
-    #     return redirect(url_for('cafes'))
+    if form.validate_on_submit():
+        new_cafe = Cafe(
+            name=form.name.data,
+            map_url=form.map_url.data,
+            img_url=form.img_url.data,
+            location=form.location.data,
+            open_time=form.open_time.data,
+            closing_time=form.closing_time.data,
+            seats=form.seats.data,
+            has_toilet=form.has_toilet.data,
+            wifi_rating=form.wifi_rating.data,
+            outlet_rating=form.outlet_rating.data,
+            can_take_calls=form.can_take_calls.data,
+            coffee_price=form.coffee_price.data,
+            coffee_rating=form.coffee_rating.data,
+            cafe_desc=form.cafe_desc.data
+        )
+        db.session.add(new_cafe)
+        db.session.commit()
+        return redirect(url_for("all_cafes"))
     return render_template('add.html', form=form)
 
 
 
 
-# When user wants to see a specific cafe
-# @app.route("/cafe/<int:cafe_id>", methods=["GET"])
-# def show_post(cafe_id):
-#     requested_cafe = db.get_or_404(Cafe, cafe_id)
-#
-#     return render_template("cafe.html", post=requested_cafe)
 
 
 if __name__ == '__main__':
