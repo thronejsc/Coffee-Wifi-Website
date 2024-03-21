@@ -40,6 +40,15 @@ class Cafe(db.Model):
     coffee_price: Mapped[str] = mapped_column(String(10), nullable=True)
     coffee_rating: Mapped[str] = mapped_column(String(10), nullable=True)
     cafe_desc: Mapped[str] = mapped_column(String(1000), nullable=True)
+    visitor_ratings = db.relationship('VisitorRating', backref='cafe', lazy=True)
+
+
+class VisitorRating(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    cafe_id = db.Column(db.Integer, db.ForeignKey('cafe.id'), nullable=False)
+    coffee_rating = db.Column(db.Integer, nullable=False)
+    wifi_rating = db.Column(db.Integer, nullable=False)
+    outlet_rating = db.Column(db.Integer, nullable=False)
 
 
 with app.app_context():
@@ -74,6 +83,18 @@ class CafeForm(FlaskForm):
 
 
 # TODO: Make a form for reviews for a cafe
+class RatingForm(FlaskForm):
+    coffee_rating = SelectField(label="Coffee Rating",
+                                choices=[('1', '☕️'), ('2', '☕️☕️'), ('3', '☕️☕️☕️'), ('4', '☕️☕️☕️☕️'),
+                                         ('5', '☕️☕️☕️☕️☕️')],
+                                validators=[DataRequired()])
+    wifi_rating = SelectField(label="WiFi Rating",
+                              choices=[('1', '💪'), ('2', '💪💪'), ('3', '💪💪💪'), ('4', '💪💪💪💪'), ('5', '💪💪💪💪💪')],
+                              validators=[DataRequired()])
+    outlet_rating = SelectField(label="Outlet Rating",
+                                choices=[('1', '🔌'), ('2', '🔌🔌'), ('3', '🔌🔌🔌'), ('4', '🔌🔌🔌🔌'), ('5', '🔌🔌🔌🔌🔌')],
+                                validators=[DataRequired()])
+    submit = SubmitField('Submit Rating')
 
 
 @app.route("/")
@@ -83,14 +104,27 @@ def home():
 
 @app.route("/cafe/<cafe_name>")
 def cafe(cafe_name):
-    cafe_name = cafe_name.replace('-', ' ')
     requested_cafe = db.session.execute(db.select(Cafe).where(Cafe.name == cafe_name)).scalar()
     wifi_rating = int(requested_cafe.wifi_rating) if requested_cafe.wifi_rating else 0
     outlet_rating = int(requested_cafe.outlet_rating) if requested_cafe.outlet_rating else 0
     coffee_rating = int(requested_cafe.coffee_rating)
-    print(wifi_rating)
-    print(type(wifi_rating))
-    return render_template("cafe.html", cafe_name=cafe_name, wifi_rating=wifi_rating, outlet_rating=outlet_rating, coffee_rating=coffee_rating, cafe=requested_cafe)
+    if requested_cafe.visitor_ratings:
+        overall_avg = calculate_overall_rating(requested_cafe.visitor_ratings)
+    else:
+        overall_avg = 0
+    return render_template("cafe.html", cafe_name=cafe_name, wifi_rating=wifi_rating, outlet_rating=outlet_rating, coffee_rating=coffee_rating, overall_avg=overall_avg, cafe=requested_cafe)
+
+
+def calculate_overall_rating(ratings):
+    total_coffee_ratings = sum(rating.coffee_rating for rating in ratings)
+    total_wifi_ratings = sum(rating.wifi_rating for rating in ratings)
+    total_outlet_ratings = sum(rating.outlet_rating for rating in ratings)
+    num_ratings = len(ratings)
+    if num_ratings:
+        overall_rating = round((total_coffee_ratings + total_wifi_ratings + total_outlet_ratings) / (num_ratings * 3), 2)
+        return overall_rating
+    else:
+        return 0
 
 
 @app.route('/all-cafes-json')
@@ -173,8 +207,26 @@ def add_cafe():
     return render_template('add.html', form=form)
 
 
+@app.route('/rate-a-cafe/<cafe_name>', methods=['GET', 'POST'])
+def rate_cafe(cafe_name):
+    requested_cafe = Cafe.query.filter_by(name=cafe_name).first()
+    form = RatingForm()
+    if form.validate_on_submit():
+        new_rating = VisitorRating(
+            coffee_rating=form.coffee_rating.data,
+            wifi_rating=form.wifi_rating.data,
+            outlet_rating=form.outlet_rating.data,
+            cafe_id=requested_cafe.id
+        )
+        db.session.add(new_rating)
+        db.session.commit()
+        return redirect(url_for("cafe", cafe_name=cafe_name))
+    return render_template('rating.html', form=form)
 
 
+@app.route('/about')
+def about():
+    return render_template('about.html')
 
 
 if __name__ == '__main__':
