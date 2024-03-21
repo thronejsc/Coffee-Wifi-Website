@@ -15,6 +15,16 @@
     <div class="carousel-caption text-start">
         {% if cafe %}
         <h1 class="cafe-name">{{ cafe.name }}</h1>
+        <p class="coffee-rating" style="font-size: 36px;">
+        {% set rating_emoji = {
+            1: '️☕️',
+            2: '☕️☕️',
+            3: '☕️☕️☕️',
+            4: '☕️☕️☕️☕️',
+            5: '☕️☕️☕️☕️☕️'
+        } %}
+        {{ rating_emoji[coffee_rating] }}
+        </p>
         {% else %}
         <h1 class="cafe-name">Cafe Name</h1>
         {% endif %}
@@ -39,10 +49,7 @@
                 <div id="description">
                     <h2>About</h2>
                     <p>
-                        Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
-                        Molestie ac feugiat sed lectus vestibulum mattis ullamcorper. At tellus at urna condimentum mattis pellentesque id nibh tortor.
-                        Ornare arcu dui vivamus arcu felis bibendum ut tristique. Ultrices gravida dictum fusce ut.
-                        Lacus laoreet non curabitur gravida arcu ac tortor dignissim convallis.
+                        {{ cafe.cafe_desc }}
                     </p>
                 </div>
                 <div id="reviews">
@@ -66,7 +73,7 @@
                                 <div class="col-6">
                                     <i class="fa fa-fw fa-toilet-paper"></i>
                                     Has Toilet/Restroom
-                                    {% if cafe.has_wifi == True %}
+                                    {% if cafe.has_toilet == True %}
                                     <div class="progress">
                                         <div class="progress-bar bg-success" role="progressbar" style="width: 100%" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100">Yes</div>
                                     </div>
@@ -78,10 +85,10 @@
                                 </div>
                                 <div class="col-6">
                                     <i class="fa fa-fw fa-wifi"></i>
-                                    Has WiFi
-                                    {% if cafe.has_wifi == True %}
+                                    WiFi Connection
+                                    {% if wifi_rating > 0 %}
                                     <div class="progress">
-                                        <div class="progress-bar bg-success" role="progressbar" style="width: 100%" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100">Yes</div>
+                                        <div class="progress-bar bg-success" role="progressbar" style="width: {{ wifi_rating * 20 }}%" aria-valuenow="{{ wifi_rating * 20 }}" aria-valuemin="0" aria-valuemax="100">{{ wifi_rating }}/5 💪</div>
                                     </div>
                                     {% else %}
                                     <div class="progress">
@@ -93,10 +100,10 @@
                             <div class="row">
                                 <div class="col-6">
                                     <i class="fa fa-fw fa-plug"></i>
-                                    Has Power Sockets
-                                    {% if cafe.has_sockets == True %}
+                                    Outlet Availability
+                                    {% if outlet_rating > 0 %}
                                     <div class="progress">
-                                        <div class="progress-bar bg-success" role="progressbar" style="width: 100%" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100">Yes</div>
+                                        <div class="progress-bar bg-success" role="progressbar" style="width: {{ outlet_rating * 20 }}%" aria-valuenow="{{ outlet_rating * 20 }}" aria-valuemin="0" aria-valuemax="100">{{ outlet_rating }}/5 🔌</div>
                                     </div>
                                     {% else %}
                                     <div class="progress">
@@ -179,11 +186,8 @@
                             <i class="fa-regular fa-clock"></i>
                         </div>
                         <div class="col-md-10">
-                            <ul>
-                                <li>TBA</li>
-                                <li>TBA</li>
-                                <li>TBA</li>
-                            </ul>
+                            <p>{{ cafe.open_time}} - {{ cafe.closing_time  }}</p>
+                            <p>Weekdays / Weekends</p>
                         </div>
                     </div>
                 </div>

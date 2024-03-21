@@ -85,7 +85,12 @@ def home():
 def cafe(cafe_name):
     cafe_name = cafe_name.replace('-', ' ')
     requested_cafe = db.session.execute(db.select(Cafe).where(Cafe.name == cafe_name)).scalar()
-    return render_template("cafe.html", cafe_name=cafe_name, cafe=requested_cafe)
+    wifi_rating = int(requested_cafe.wifi_rating) if requested_cafe.wifi_rating else 0
+    outlet_rating = int(requested_cafe.outlet_rating) if requested_cafe.outlet_rating else 0
+    coffee_rating = int(requested_cafe.coffee_rating)
+    print(wifi_rating)
+    print(type(wifi_rating))
+    return render_template("cafe.html", cafe_name=cafe_name, wifi_rating=wifi_rating, outlet_rating=outlet_rating, coffee_rating=coffee_rating, cafe=requested_cafe)
 
 
 @app.route('/all-cafes-json')
