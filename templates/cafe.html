@@ -188,7 +188,6 @@
                             </p>
                         </div>
                     </div>
-
                 </div>
                 <div id="schedule">
                     <h2>Schedule</h2>
@@ -199,6 +198,19 @@
                         <div class="col-md-10">
                             <p>{{ cafe.open_time}} - {{ cafe.closing_time  }}</p>
                             <p>Weekdays / Weekends</p>
+                        </div>
+                    </div>
+                </div>
+                <div id="update">
+                    <h3>Missing or Incorrect Information?</h3>
+                    <div class="row">
+                        <div class="col-md-2">
+                            <i class="fa-regular fa-pen-to-square"></i>
+                        </div>
+                        <div class="col-md-10">
+                            <p>
+                                <a href="{{ url_for('update_cafe', cafe_name=cafe.name) }}">Update Page</a>
+                            </p>
                         </div>
                     </div>
                 </div>

@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, render_template, request, redirect, url_for
+from flask import Flask, jsonify, render_template, redirect, url_for
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 from sqlalchemy import Integer, String, Boolean
@@ -6,7 +6,6 @@ from flask_bootstrap import Bootstrap5
 from flask_wtf import FlaskForm
 from wtforms import StringField, SubmitField, SelectField, TextAreaField, BooleanField
 from wtforms.validators import DataRequired, URL
-import random
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = '8BYkEfBA6O6donzWlSihBXox7C0sKR6b'
@@ -131,7 +130,6 @@ def calculate_overall_rating(ratings):
 def all_cafe_json():
     cafes = []
     all_cafes = db.session.execute(db.select(Cafe)).scalars().all()
-
     if all_cafes:
         for cafe in all_cafes:
             cafe_json = {
@@ -222,6 +220,19 @@ def rate_cafe(cafe_name):
         db.session.commit()
         return redirect(url_for("cafe", cafe_name=cafe_name))
     return render_template('rating.html', form=form)
+
+
+@app.route('/update-cafe/<cafe_name>', methods=['GET', 'POST'])
+def update_cafe(cafe_name):
+    requested_cafe = Cafe.query.filter_by(name=cafe_name).first()
+    form = CafeForm(obj=requested_cafe)
+
+    if form.validate_on_submit():
+        form.populate_obj(requested_cafe)
+        db.session.commit()
+        return redirect(url_for('cafe', cafe_name=requested_cafe.name))
+
+    return render_template('update.html', form=form)
 
 
 @app.route('/about')
